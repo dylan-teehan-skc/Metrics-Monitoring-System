@@ -1,0 +1,48 @@
+{
+  "app": {
+    "name": "Metrics Monitor",
+    "version": "1.0.0"
+  },
+  "logging": {
+    "level": "INFO",
+    "targets": {
+      "file": {
+        "enabled": true,
+        "path": "src/metrics_monitoring/logs/monitoring_metrics.log",
+        "level": "INFO",
+        "format": "%(asctime)s - %(levelname)s - %(message)s"
+      },
+      "console": {
+        "enabled": true,
+        "level": "INFO",
+        "format": "%(levelname)s: %(message)s",
+        "colors": {
+          "DEBUG": "BLUE",
+          "INFO": "GREEN",
+          "WARNING": "YELLOW",
+          "ERROR": "RED",
+          "CRITICAL": "RED"
+        },
+        "use_colors": true
+      }
+    }
+  },
+  "monitoring": {
+    "update_interval": 10,
+    "system_metrics": {
+      "enabled": true,
+      "metrics": ["cpu_percent", "memory_percent"]
+    },
+    "xrp": {
+      "enabled": true
+    },
+    "btc": {
+      "enabled": true
+    }
+  },
+  "server": {
+    "url": "http://localhost:8000/metrics",
+    "retry_attempts": 3,
+    "retry_delay": 1
+  }
+} 
