@@ -13,7 +13,7 @@ class BaseMonitor(ABC):
         self.logger = setup_logger(self.config)
         self._running = True
         self.update_interval = self.config['monitoring']['update_interval']
-        self.logger.info(f"{self.get_name()} Monitor Initialized")
+        self.logger.debug(f"{self.get_name()} Monitor Initialized")
 
     @abstractmethod
     def get_name(self) -> str:

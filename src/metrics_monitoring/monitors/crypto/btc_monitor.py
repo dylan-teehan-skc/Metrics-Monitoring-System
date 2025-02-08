@@ -1,16 +1,15 @@
-"""Bitcoin price monitoring module"""
 from ..base_monitor import BaseMonitor
 import requests
 from typing import Dict, Any
-from datetime import datetime
-from src.utils.timer import Timer
+from src.utils.block_timer import BlockTimer
 
 class BTCMonitor(BaseMonitor):
     def __init__(self):
         """Initialize the BTC Monitor"""
         super().__init__()
-        self.api_url = "https://api.binance.com/api/v3/ticker/price?symbol=BTCEUR"
         self.enabled = self.config['monitoring']['btc']['enabled']
+        self.api_url = self.config['monitoring']['btc']['api_url']
+        self.logger.debug(f"BTC monitor initialized with API URL: {self.api_url}")
     
     def get_name(self) -> str:
         return "BTC"
@@ -22,25 +21,23 @@ class BTCMonitor(BaseMonitor):
             return {}
 
         try:
-            with Timer(self.api_url):
+            with BlockTimer(self.api_url):
                 response = requests.get(self.api_url)
                 response.raise_for_status()
                 data = response.json()
             
             price = float(data['price'])
             return {
-                'price_eur': price,
+                'price': price,
                 'currency': 'EUR',
-                'last_update': datetime.now().isoformat(),
                 'error': None
             }
             
         except requests.RequestException as e:
             self.logger.error(f"Error fetching BTC price: {str(e)}")
             return {
-                'price_eur': None,
+                'price': None,
                 'currency': 'EUR',
-                'last_update': datetime.now().isoformat(),
                 'error': str(e)
             }
     
@@ -48,5 +45,5 @@ class BTCMonitor(BaseMonitor):
         """Log the collected metrics"""
         if not self.enabled or not metrics:
             return
-        if metrics.get('error') is None and metrics.get('price_eur') is not None:
-            self.logger.info(f"BTC Price: €{metrics['price_eur']:.4f} {metrics['currency']}") 
+        if metrics.get('error') is None and metrics.get('price') is not None:
+            self.logger.info(f"BTC Price: €{metrics['price']:.4f} {metrics['currency']}") 

@@ -4,16 +4,14 @@ from src.metrics_monitoring.monitors.crypto.btc_monitor import BTCMonitor
 from src.metrics_monitoring.monitors.crypto.xrp_monitor import XRPMonitor
 
 def main():
-    # Create the monitor handler
-    monitor = MonitorHandler()
+    monitorHandler = MonitorHandler()
 
     # Register monitors
-    monitor.register_monitor(SystemMonitor())
-    monitor.register_monitor(BTCMonitor())
-    monitor.register_monitor(XRPMonitor())
+    monitorHandler.register_monitor(SystemMonitor())
+    monitorHandler.register_monitor(BTCMonitor())
+    monitorHandler.register_monitor(XRPMonitor())
 
-    # Run the monitoring
-    monitor.run()
-    
+    monitorHandler.run()	
+     
 if __name__ == "__main__":
     main()

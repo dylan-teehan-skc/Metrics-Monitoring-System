@@ -4,12 +4,11 @@
     "version": "1.0.0"
   },
   "logging": {
-    "level": "INFO",
     "targets": {
       "file": {
         "enabled": true,
         "path": "src/metrics_monitoring/logs/monitoring_metrics.log",
-        "level": "INFO",
+        "level": "DEBUG",
         "format": "%(asctime)s - %(levelname)s - %(message)s"
       },
       "console": {
@@ -31,18 +30,18 @@
     "update_interval": 10,
     "system_metrics": {
       "enabled": true,
-      "metrics": ["cpu_percent", "memory_percent"]
+      "metrics": ["cpu_usage", "memory_usage"]
     },
     "xrp": {
-      "enabled": true
+      "enabled": true,
+      "api_url": "https://api.binance.com/api/v3/ticker/price?symbol=XRPEUR"
     },
     "btc": {
-      "enabled": true
+      "enabled": true,
+      "api_url": "https://api.binance.com/api/v3/ticker/price?symbol=BTCEUR"
     }
   },
   "server": {
-    "url": "http://localhost:8000/metrics",
-    "retry_attempts": 3,
-    "retry_delay": 1
+    "url": "https://dylanteehan.pythonanywhere.com/metrics"
   }
 } 

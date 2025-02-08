@@ -2,13 +2,15 @@ from ..base_monitor import BaseMonitor
 import requests
 from typing import Dict, Any
 from datetime import datetime
+from src.utils.block_timer import BlockTimer
 
 class XRPMonitor(BaseMonitor):
     def __init__(self):
         """Initialize the XRP Monitor"""
         super().__init__()
-        self.api_url = "https://api.binance.com/api/v3/ticker/price?symbol=XRPEUR"
         self.enabled = self.config['monitoring']['xrp']['enabled']
+        self.api_url = self.config['monitoring']['xrp']['api_url']
+        self.logger.debug(f"XRP monitor initialized with API URL: {self.api_url}")
     
     def get_name(self) -> str:
         return "XRP"
@@ -20,24 +22,23 @@ class XRPMonitor(BaseMonitor):
             return {}
 
         try:
-            response = requests.get(self.api_url)
-            response.raise_for_status()
-            data = response.json()
+            with BlockTimer(self.api_url):
+                response = requests.get(self.api_url)
+                response.raise_for_status()
+                data = response.json()
             
             price = float(data['price'])
             return {
-                'price_eur': price,
+                'price': price,
                 'currency': 'EUR',
-                'last_update': datetime.now().isoformat(),
                 'error': None
             }
 
         except requests.RequestException as e:
             self.logger.error(f"Error fetching XRP price: {str(e)}")
             return {
-                'price_eur': None,
+                'price': None,
                 'currency': 'EUR',
-                'last_update': datetime.now().isoformat(),
                 'error': str(e)
             }
     
@@ -45,5 +46,5 @@ class XRPMonitor(BaseMonitor):
         """Log the collected metrics"""
         if not self.enabled or not metrics:
             return
-        if metrics.get('error') is None and metrics.get('price_eur') is not None:
-            self.logger.info(f"XRP Price: €{metrics['price_eur']:.4f} {metrics['currency']}")
+        if metrics.get('error') is None and metrics.get('price') is not None:
+            self.logger.info(f"XRP Price: €{metrics['price']:.4f} {metrics['currency']}")

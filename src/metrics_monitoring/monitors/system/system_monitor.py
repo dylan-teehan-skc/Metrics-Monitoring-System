@@ -2,12 +2,15 @@
 from ..base_monitor import BaseMonitor
 import psutil
 from typing import Dict, Any
+from src.utils.block_timer import BlockTimer
 
 class SystemMonitor(BaseMonitor):
     def __init__(self):
         """Initialize the SystemMonitor"""
         super().__init__()
         self.enabled = self.config['monitoring']['system_metrics']['enabled']
+        self.enabled_metrics = self.config['monitoring']['system_metrics']['metrics']
+        self.logger.debug(f"System monitor initialized with metrics: {self.enabled_metrics}")
     
     def get_name(self) -> str:
         return "System"
@@ -17,18 +20,31 @@ class SystemMonitor(BaseMonitor):
             self.logger.warning("System monitoring is disabled in config")
             return {}
 
-        metrics = {
-            'cpu': {
-                'usage_percent': psutil.cpu_percent(interval=self.update_interval)
-            },
-            'memory': {
-                'usage_percent': psutil.virtual_memory().percent
-            }
-        }
-        return metrics
+        try:
+            with BlockTimer("Collect system metrics"):
+                metrics = {}
+                
+                # Only collect configured metrics
+                if 'cpu_usage' in self.enabled_metrics:
+                    metrics['cpu'] = {
+                        'usage_percent': psutil.cpu_percent(interval=self.update_interval)
+                    }
+                    
+                if 'memory_usage' in self.enabled_metrics:
+                    metrics['memory'] = {
+                        'usage_percent': psutil.virtual_memory().percent
+                    }
+                
+                return metrics
+                
+        except Exception as e:
+            self.logger.error(f"Error collecting system metrics: {str(e)}")
+            return {}
         
     def log_metrics(self, metrics: Dict[str, Any]) -> None:
         if not self.enabled:
-            return
-        self.logger.info(f"CPU Usage: {metrics['cpu']['usage_percent']}%")
-        self.logger.info(f"Memory Usage: {metrics['memory']['usage_percent']}%") 
+            return        
+        if 'cpu' in metrics:
+            self.logger.info(f"CPU Usage: {metrics['cpu']['usage_percent']}%")
+        if 'memory' in metrics:
+            self.logger.info(f"Memory Usage: {metrics['memory']['usage_percent']}%") 

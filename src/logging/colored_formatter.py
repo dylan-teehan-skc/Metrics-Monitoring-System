@@ -1,4 +1,3 @@
-"""Custom colored formatter for console logging"""
 import logging
 from colorama import init, Fore, Style
 
