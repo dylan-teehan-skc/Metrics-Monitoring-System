@@ -34,14 +34,14 @@
     },
     "xrp": {
       "enabled": true,
-      "api_url": "https://api.binance.com/api/v3/ticker/price?symbol=XRPEUR"
+      "api_url": "${BINANCE_XRP_URL}"
     },
     "btc": {
       "enabled": true,
-      "api_url": "https://api.binance.com/api/v3/ticker/price?symbol=BTCEUR"
+      "api_url": "${BINANCE_BTC_URL}"
     }
   },
   "server": {
-    "url": "https://dylanteehan.pythonanywhere.com/metrics"
+    "url": "${PYTHONAWAY_URL}"
   }
 } 

@@ -1,3 +1,4 @@
+"""Simple in-memory message queue for metrics"""
 from collections import deque
 from threading import Thread, Event
 import time
@@ -52,7 +53,7 @@ class SimpleQueue:
                     metrics = self.queue.popleft()
                     self.logger.debug(f"Processing metrics from queue (remaining: {len(self.queue)})")
                     
-                    with BlockTimer("Send metrics from queue to PythonAnywhere"):
+                    with BlockTimer("Send metrics to PythonAnywhere") as timer:
                         self.logger.debug(f"Sending metrics payload: {len(json.dumps(metrics))} bytes")
                         
                         # Log metrics being sent
@@ -67,6 +68,7 @@ class SimpleQueue:
                         )
                         response.raise_for_status()
                         
+                        self.logger.info(f"Successfully sent metrics to PythonAnywhere")
                         self.logger.debug(f"Server response status code: {response.status_code}")
                         self.logger.debug(f"Server response: {json.dumps(response.json(), indent=2)}")
                         
