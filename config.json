@@ -6,7 +6,7 @@
   "logging": {
     "targets": {
       "file": {
-        "enabled": true,
+        "enabled": false,
         "path": "src/metrics_monitoring/logs/monitoring_metrics.log",
         "level": "DEBUG",
         "format": "%(asctime)s - %(levelname)s - %(message)s"

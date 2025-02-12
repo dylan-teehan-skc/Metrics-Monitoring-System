@@ -27,12 +27,14 @@ class SystemMonitor(BaseMonitor):
                 # Only collect configured metrics
                 if 'cpu_usage' in self.enabled_metrics:
                     metrics['cpu'] = {
-                        'usage_percent': psutil.cpu_percent(interval=self.update_interval)
+                        'value': psutil.cpu_percent(interval=self.update_interval),
+                        'unit': 'percent'
                     }
                     
                 if 'memory_usage' in self.enabled_metrics:
                     metrics['memory'] = {
-                        'usage_percent': psutil.virtual_memory().percent
+                        'value': psutil.virtual_memory().percent,
+                        'unit': 'percent'
                     }
                 
                 return metrics
@@ -45,6 +47,6 @@ class SystemMonitor(BaseMonitor):
         if not self.enabled:
             return        
         if 'cpu' in metrics:
-            self.logger.info(f"CPU Usage: {metrics['cpu']['usage_percent']}%")
+            self.logger.info(f"CPU Usage: {metrics['cpu']['value']}%")
         if 'memory' in metrics:
-            self.logger.info(f"Memory Usage: {metrics['memory']['usage_percent']}%") 
+            self.logger.info(f"Memory Usage: {metrics['memory']['value']}%") 

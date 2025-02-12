@@ -11,7 +11,7 @@ class MetricsModel:
         self.logger = setup_logger(self.config)
         self.template = DefaultTemplate()
         
-    def create_metrics_structure(self, collected_metrics: Dict[str, Dict], collection_duration: int = 0) -> Dict:
+    def create_metrics_structure(self, collected_metrics: Dict[str, Dict]) -> Dict:
         """Create metrics structure using template"""
         try:
             # Clean up metrics data
@@ -28,8 +28,7 @@ class MetricsModel:
             
             # Create structure using template
             metrics = self.template.create_structure(
-                cleaned_metrics, 
-                collection_duration=collection_duration
+                cleaned_metrics
             )
             
             # Override source with app name

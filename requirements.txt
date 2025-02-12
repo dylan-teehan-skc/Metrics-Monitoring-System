@@ -1,5 +1,3 @@
-# Core dependencies
-flask>=2.0.0
 requests>=2.26.0
 psutil>=5.8.0
 aiohttp>=3.8.0

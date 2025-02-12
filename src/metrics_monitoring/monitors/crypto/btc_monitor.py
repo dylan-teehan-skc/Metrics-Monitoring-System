@@ -28,16 +28,16 @@ class BTCMonitor(BaseMonitor):
             
             price = float(data['price'])
             return {
-                'price': price,
-                'currency': 'EUR',
+                'value': price,
+                'unit': 'EUR',
                 'error': None
             }
             
         except requests.RequestException as e:
             self.logger.error(f"Error fetching BTC price: {str(e)}")
             return {
-                'price': None,
-                'currency': 'EUR',
+                'value': None,
+                'unit': 'EUR',
                 'error': str(e)
             }
     
@@ -45,5 +45,5 @@ class BTCMonitor(BaseMonitor):
         """Log the collected metrics"""
         if not self.enabled or not metrics:
             return
-        if metrics.get('error') is None and metrics.get('price') is not None:
-            self.logger.info(f"BTC Price: €{metrics['price']:.4f} {metrics['currency']}") 
+        if metrics.get('error') is None and metrics.get('value') is not None:
+            self.logger.info(f"BTC Price: €{metrics['value']:.4f} {metrics['unit']}") 
