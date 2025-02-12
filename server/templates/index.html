@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Metrics Monitor</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        select, input[type="submit"] { width: 100%; padding: 10px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to Metrics Monitor</h1>
+        <form action="{{ url_for('dashboard') }}" method="get">
+            <label for="monitor">Select Monitor Type:</label>
+            <select name="monitor" id="monitor" onchange="updateMetrics()">
+                <option value="">--Select Monitor--</option>
+                {% for monitor in monitor_names %}
+                <option value="{{ monitor }}">{{ monitor }}</option>
+                {% endfor %}
+            </select>
+            <br>
+            <label for="metric">Select Metric:</label>
+            <select name="metric" id="metric">
+                <option value="">--Select Metric--</option>
+                <!-- Options will be populated by JavaScript -->
+            </select>
+            <br>
+            <input type="submit" value="View Dashboard">
+        </form>
+    </div>
+    <script>
+        const metrics = {
+            "System": ["cpu_usage", "memory_usage"],
+            "Crypto": ["btc", "xrp"]
+        };
+
+        function updateMetrics() {
+            const monitorSelect = document.getElementById('monitor');
+            const metricSelect = document.getElementById('metric');
+            const selectedMonitor = monitorSelect.value;
+
+            // Clear existing options
+            metricSelect.innerHTML = '<option value="">--Select Metric--</option>';
+
+            // Populate new options
+            if (metrics[selectedMonitor]) {
+                metrics[selectedMonitor].forEach(metric => {
+                    const option = document.createElement('option');
+                    option.value = metric;
+                    option.textContent = metric;
+                    metricSelect.appendChild(option);
+                });
+            }
+        }
+    </script>
+    <ul>
+        <li><a href="{{ url_for('get_monitors') }}">View Monitors</a></li>
+        <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+    </ul>
+</body>
+</html> 

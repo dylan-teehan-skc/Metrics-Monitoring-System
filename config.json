@@ -28,17 +28,23 @@
   },
   "monitoring": {
     "update_interval": 10,
-    "system_metrics": {
-      "enabled": true,
-      "metrics": ["cpu_usage", "memory_usage"]
+    "System": {
+      "cpu_usage": {
+        "enabled": true
+      },
+      "memory_usage": {
+        "enabled": true
+      }
     },
-    "xrp": {
-      "enabled": true,
-      "api_url": "${BINANCE_XRP_URL}"
-    },
-    "btc": {
-      "enabled": true,
-      "api_url": "${BINANCE_BTC_URL}"
+    "Crypto": {
+      "xrp": {
+        "enabled": true,
+        "api_url": "${BINANCE_XRP_URL}"
+      },
+      "btc": {
+        "enabled": true,
+        "api_url": "${BINANCE_BTC_URL}"
+      }
     }
   },
   "server": {

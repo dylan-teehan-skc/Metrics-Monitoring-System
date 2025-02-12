@@ -8,12 +8,12 @@ class XRPMonitor(BaseMonitor):
     def __init__(self):
         """Initialize the XRP Monitor"""
         super().__init__()
-        self.enabled = self.config['monitoring']['xrp']['enabled']
-        self.api_url = self.config['monitoring']['xrp']['api_url']
+        self.enabled = self.config['monitoring']['Crypto']['xrp']['enabled']
+        self.api_url = self.config['monitoring']['Crypto']['xrp']['api_url']
         self.logger.debug(f"XRP monitor initialized with API URL: {self.api_url}")
     
     def get_name(self) -> str:
-        return "XRP"
+        return "xrp"
 
     def collect_metrics(self) -> Dict[str, Any]:
         """Collect metrics specific to this monitor"""
@@ -30,8 +30,7 @@ class XRPMonitor(BaseMonitor):
             price = float(data['price'])
             return {
                 'value': price,
-                'unit': 'EUR',
-                'error': None
+                'unit': 'EUR'
             }
 
         except requests.RequestException as e:

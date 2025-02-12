@@ -21,7 +21,22 @@ logger = app.logger
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    session = SessionLocal()
+    try:
+        # Query for available monitors and metrics
+        monitors = session.query(Monitor).all()
+        metrics = session.query(MetricType).all()
+
+        # Extract unique monitor names and metric names
+        monitor_names = {monitor.name for monitor in monitors}
+        metric_names = {metric.name for metric in metrics}
+
+        return render_template('index.html', monitor_names=monitor_names, metric_names=metric_names)
+    except Exception as e:
+        logger.error(f"Error in index: {str(e)}")
+        return jsonify({"error": "Internal server error"}), 500
+    finally:
+        session.close()
 
 @app.route('/monitors', methods=['GET'])
 def get_monitors():
@@ -153,11 +168,21 @@ def post_metrics():
 @app.route('/dashboard', methods=['GET'])
 def dashboard():
     session = SessionLocal()
+    monitor_type = request.args.get('monitor')
+    metric_name = request.args.get('metric')
     try:
-        metrics = session.query(MetricValue).options(
+        # Filter metrics based on user selection
+        query = session.query(MetricValue).join(MetricType).join(Monitor)
+        if monitor_type:
+            query = query.filter(Monitor.name == monitor_type)
+        if metric_name:
+            query = query.filter(MetricType.name == metric_name)
+        
+        metrics = query.options(
             joinedload(MetricValue.metric_type).joinedload(MetricType.monitor)
         ).all()
-        return render_template('dashboard.html', metrics=metrics)
+        
+        return render_template('dashboard.html', metrics=metrics, monitor_type=monitor_type, metric_name=metric_name)
     except Exception as e:
         logger.error(f"Error in dashboard: {str(e)}")
         return jsonify({"error": "Internal server error"}), 500

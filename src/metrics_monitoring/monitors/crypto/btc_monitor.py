@@ -7,12 +7,12 @@ class BTCMonitor(BaseMonitor):
     def __init__(self):
         """Initialize the BTC Monitor"""
         super().__init__()
-        self.enabled = self.config['monitoring']['btc']['enabled']
-        self.api_url = self.config['monitoring']['btc']['api_url']
+        self.enabled = self.config['monitoring']['Crypto']['btc']['enabled']
+        self.api_url = self.config['monitoring']['Crypto']['btc']['api_url']
         self.logger.debug(f"BTC monitor initialized with API URL: {self.api_url}")
     
     def get_name(self) -> str:
-        return "BTC"
+        return "btc"
 
     def collect_metrics(self) -> Dict[str, Any]:
         """Collect metrics specific to this monitor"""
@@ -29,8 +29,7 @@ class BTCMonitor(BaseMonitor):
             price = float(data['price'])
             return {
                 'value': price,
-                'unit': 'EUR',
-                'error': None
+                'unit': 'EUR'
             }
             
         except requests.RequestException as e:

@@ -27,12 +27,21 @@ class MonitorHandler:
         self.logger.debug("Starting metrics collection...")
         
         with BlockTimer("Complete metrics collection"):
-            all_metrics = {}
+            # Initialize all_metrics based on configured groups
+            all_metrics = {group: {} for group in self.config['monitoring'] if isinstance(self.config['monitoring'][group], dict)}
+            
             for monitor in self.monitors:
                 try:
                     metrics = monitor.collect_metrics()
                     monitor.log_metrics(metrics)
-                    all_metrics[monitor.get_name()] = metrics
+                    
+                    # Determine the group for the monitor using the configuration
+                    for group, monitors in self.config['monitoring'].items():
+                        if isinstance(monitors, dict) and monitor.get_name() in monitors:
+                            all_metrics[group].update({monitor.get_name(): metrics})
+                            break
+                    else:
+                        self.logger.warning(f"Monitor {monitor.get_name()} does not belong to any configured group")
                 except Exception as e:
                     self.logger.error(f"Error collecting metrics from {monitor.get_name()}: {str(e)}")
             
