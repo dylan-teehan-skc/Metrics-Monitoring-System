@@ -59,11 +59,6 @@ class SimpleQueue:
                         # Log the payload being sent
                         self.logger.debug(f"Payload being sent: {json.dumps(metrics, indent=2)}")
                         
-                        # Log metrics being sent
-                        if 'data' in metrics:
-                            for monitor_name, monitor_data in metrics['data'].items():
-                                self.logger.debug(f"Sending {monitor_name} metrics: {json.dumps(monitor_data, indent=2)}")
-                        
                         response = requests.post(
                             self.server_url,
                             json=metrics,

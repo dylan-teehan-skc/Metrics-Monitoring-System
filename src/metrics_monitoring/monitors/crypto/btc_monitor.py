@@ -9,7 +9,6 @@ class BTCMonitor(BaseMonitor):
         super().__init__()
         self.enabled = self.config['monitoring']['Crypto']['btc']['enabled']
         self.api_url = self.config['monitoring']['Crypto']['btc']['api_url']
-        self.logger.debug(f"BTC monitor initialized with API URL: {self.api_url}")
     
     def get_name(self) -> str:
         return "btc"
@@ -21,7 +20,7 @@ class BTCMonitor(BaseMonitor):
             return {}
 
         try:
-            with BlockTimer(self.api_url):
+            with BlockTimer('Collect BTC metrics'):
                 response = requests.get(self.api_url)
                 response.raise_for_status()
                 data = response.json()

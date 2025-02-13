@@ -8,7 +8,6 @@ class CPUMonitor(BaseMonitor):
         """Initialize the CPUMonitor"""
         super().__init__()
         self.enabled = self.config['monitoring']['System']['cpu_usage']['enabled']
-        self.logger.debug("CPU monitor initialized")
     
     def get_name(self) -> str:
         return "cpu_usage"

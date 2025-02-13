@@ -8,7 +8,6 @@ class MemoryMonitor(BaseMonitor):
         """Initialize the MemoryMonitor"""
         super().__init__()
         self.enabled = self.config['monitoring']['System']['memory_usage']['enabled']
-        self.logger.debug("Memory monitor initialized")
     
     def get_name(self) -> str:
         return "memory_usage"

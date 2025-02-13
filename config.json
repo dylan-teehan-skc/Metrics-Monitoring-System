@@ -6,7 +6,7 @@
   "logging": {
     "targets": {
       "file": {
-        "enabled": false,
+        "enabled": true,
         "path": "src/metrics_monitoring/logs/monitoring_metrics.log",
         "level": "DEBUG",
         "format": "%(asctime)s - %(levelname)s - %(message)s"
@@ -34,6 +34,12 @@
       },
       "memory_usage": {
         "enabled": true
+      },
+      "disk_usage": {
+        "enabled": true
+      },
+      "process_count": {
+        "enabled": true
       }
     },
     "Crypto": {
@@ -44,6 +50,16 @@
       "btc": {
         "enabled": true,
         "api_url": "${BINANCE_BTC_URL}"
+      }
+    },
+    "Weather": {
+      "temperature": {
+        "enabled": true,
+        "api_url": "${WEATHER_API_TEMPERATURE_URL}"
+      },
+      "humidity": {
+        "enabled": true,
+        "api_url": "${WEATHER_API_HUMIDITY_URL}"
       }
     }
   },

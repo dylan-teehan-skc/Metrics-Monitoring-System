@@ -10,7 +10,6 @@ class XRPMonitor(BaseMonitor):
         super().__init__()
         self.enabled = self.config['monitoring']['Crypto']['xrp']['enabled']
         self.api_url = self.config['monitoring']['Crypto']['xrp']['api_url']
-        self.logger.debug(f"XRP monitor initialized with API URL: {self.api_url}")
     
     def get_name(self) -> str:
         return "xrp"
@@ -22,7 +21,7 @@ class XRPMonitor(BaseMonitor):
             return {}
 
         try:
-            with BlockTimer(self.api_url):
+            with BlockTimer('Collect XRP metrics'):
                 response = requests.get(self.api_url)
                 response.raise_for_status()
                 data = response.json()
