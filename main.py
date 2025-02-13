@@ -6,7 +6,7 @@ from src.metrics_monitoring.monitors.crypto.xrp_monitor import XRPMonitor
 
 def main():
     monitorHandler = MonitorHandler()
-
+    
     # Register monitors
     monitorHandler.register_monitor(CPUMonitor())
     monitorHandler.register_monitor(MemoryMonitor())

@@ -179,9 +179,7 @@ def dashboard():
             joinedload(MetricValue.metric_type).joinedload(MetricType.monitor)
         ).all()
 
-        unit = metrics[0].metric_type.unit if metrics else ''
-
-        return render_template('dashboard.html', metrics=metrics, monitor_type=monitor_type, metric_name=metric_name, unit=unit)
+        return render_template('dashboard.html', metrics=metrics, monitor_type=monitor_type, metric_name=metric_name)
     except Exception as e:
         logger.error(f"Error in dashboard: {str(e)}")
         return jsonify({"error": "Internal server error"}), 500
