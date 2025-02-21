@@ -1,4 +1,3 @@
-"""Simple in-memory message queue for metrics"""
 from collections import deque
 from threading import Thread, Event
 import time

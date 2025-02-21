@@ -7,6 +7,7 @@ from src.metrics_monitoring.monitors.crypto.btc_monitor import BTCMonitor
 from src.metrics_monitoring.monitors.crypto.xrp_monitor import XRPMonitor
 from src.metrics_monitoring.monitors.weather.temperature_monitor import TemperatureMonitor
 from src.metrics_monitoring.monitors.weather.humidity_monitor import HumidityMonitor
+from src.metrics_monitoring.monitors.space.people_in_space_monitor import PeopleInSpaceMonitor
 
 def main():
     monitorHandler = MonitorHandler()
@@ -20,6 +21,7 @@ def main():
     monitorHandler.register_monitor(XRPMonitor())
     monitorHandler.register_monitor(TemperatureMonitor())
     monitorHandler.register_monitor(HumidityMonitor())
+    monitorHandler.register_monitor(PeopleInSpaceMonitor())
 
     monitorHandler.run()	
      

@@ -61,6 +61,12 @@
         "enabled": true,
         "api_url": "${WEATHER_API_HUMIDITY_URL}"
       }
+    },
+    "Space": {
+      "people_in_space": {
+        "enabled": true,
+        "api_url": "${OPEN_NOTIFY_API_URL}" 
+      }
     }
   },
   "server": {

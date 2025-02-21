@@ -15,6 +15,7 @@ def load_config() -> Dict:
             config['monitoring']['Crypto']['xrp']['api_url'] = os.getenv('BINANCE_XRP_URL')
             config['monitoring']['Weather']['temperature']['api_url'] = os.getenv('WEATHER_API_TEMPERATURE_URL')
             config['monitoring']['Weather']['humidity']['api_url'] = os.getenv('WEATHER_API_HUMIDITY_URL')
+            config['monitoring']['Space']['people_in_space']['api_url'] = os.getenv('OPEN_NOTIFY_API_URL')
             config['server']['url'] = os.getenv('PYTHONAWAY_URL')
             return config
     except FileNotFoundError:
