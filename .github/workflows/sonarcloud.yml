@@ -108,6 +108,7 @@ jobs:
       
       - name: Generate combined coverage report
         run: |
+          cp test-results/.coverage.* .
           coverage combine .coverage.* || true
           coverage xml
       
