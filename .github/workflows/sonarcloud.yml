@@ -28,8 +28,6 @@ jobs:
           pip install pytest pytest-cov
       
       - name: Run unit tests with coverage
-        env:
-          COVERAGE_FILE: .coverage.unit
         run: |
           python -m pytest src/tests/unit -v --cov=src --cov-report=xml:unit-coverage.xml --junitxml=unit-test-results.xml
 
@@ -41,7 +39,6 @@ jobs:
           path: |
             unit-test-results.xml
             unit-coverage.xml
-            .coverage.unit
           retention-days: 30
 
   integration-tests:
@@ -63,8 +60,6 @@ jobs:
           pip install pytest pytest-cov
       
       - name: Run integration tests with coverage
-        env:
-          COVERAGE_FILE: .coverage.integration
         run: |
           python -m pytest src/tests/integration -v --cov=src --cov-report=xml:integration-coverage.xml --junitxml=integration-test-results.xml
 
@@ -76,7 +71,6 @@ jobs:
           path: |
             integration-test-results.xml
             integration-coverage.xml
-            .coverage.integration
           retention-days: 30
 
   sonarcloud:
@@ -112,10 +106,72 @@ jobs:
       
       - name: Generate combined coverage report
         run: |
-          ls -la test-results/
-          coverage combine test-results/.coverage.* || true
-          coverage xml
-      
+          python -c "
+          import xml.etree.ElementTree as ET
+          import sys
+          
+          def merge_coverage(files, output='coverage.xml'):
+              # Load first file as base
+              tree = ET.parse('test-results/unit-coverage.xml')
+              root = tree.getroot()
+              
+              # Get base coverage data
+              packages = root.find('packages')
+              
+              # Load and merge integration coverage
+              int_tree = ET.parse('test-results/integration-coverage.xml')
+              int_root = int_tree.getroot()
+              
+              # Update total statistics
+              for child in root:
+                  if child.tag == 'packages':
+                      continue
+                  int_child = int_root.find(child.tag)
+                  if int_child is not None:
+                      for attr in child.attrib:
+                          if attr.startswith(('line-rate', 'branch-rate', 'complexity')):
+                              val1 = float(child.get(attr, 0))
+                              val2 = float(int_child.get(attr, 0))
+                              child.set(attr, str((val1 + val2) / 2))
+                          elif attr.startswith(('lines-', 'branches-')):
+                              val1 = int(child.get(attr, 0))
+                              val2 = int(int_child.get(attr, 0))
+                              child.set(attr, str(val1 + val2))
+              
+              # Merge package coverage data
+              seen_files = set()
+              for package in packages.findall('package'):
+                  for classes in package.findall('classes'):
+                      for cls in classes.findall('class'):
+                          seen_files.add(cls.get('filename'))
+              
+              # Add unique files from integration tests
+              for package in int_root.find('packages').findall('package'):
+                  for classes in package.findall('classes'):
+                      for cls in classes.findall('class'):
+                          if cls.get('filename') not in seen_files:
+                              # Find or create matching package in base tree
+                              pack_name = package.get('name')
+                              base_pack = None
+                              for p in packages.findall('package'):
+                                  if p.get('name') == pack_name:
+                                      base_pack = p
+                                      break
+                              if base_pack is None:
+                                  base_pack = ET.SubElement(packages, 'package', package.attrib)
+                                  base_pack.append(ET.Element('classes'))
+                              
+                              # Add class to base package
+                              base_classes = base_pack.find('classes')
+                              base_classes.append(cls)
+                              seen_files.add(cls.get('filename'))
+              
+              # Write merged result
+              tree.write('coverage.xml', encoding='utf-8', xml_declaration=True)
+          
+          merge_coverage(['test-results/unit-coverage.xml', 'test-results/integration-coverage.xml'])
+          "
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2.1.1
         env:
