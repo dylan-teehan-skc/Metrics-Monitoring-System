@@ -28,8 +28,10 @@ jobs:
           pip install pytest pytest-cov
       
       - name: Run unit tests with coverage
+        env:
+          COVERAGE_FILE: .coverage.unit
         run: |
-          python -m pytest src/tests/unit -v --cov=src --cov-report=xml --cov-report=xml:coverage.xml --cov-data-file=.coverage.unit --junitxml=unit-test-results.xml --cov-branch
+          python -m pytest src/tests/unit -v --cov=src --cov-report=xml --cov-report=xml:coverage.xml --junitxml=unit-test-results.xml --cov-branch
 
       - name: Upload unit test results
         uses: actions/upload-artifact@v4
@@ -61,8 +63,10 @@ jobs:
           pip install pytest pytest-cov
       
       - name: Run integration tests with coverage
+        env:
+          COVERAGE_FILE: .coverage.integration
         run: |
-          python -m pytest src/tests/integration -v --cov=src --cov-report=xml:integration-coverage.xml --cov-data-file=.coverage.integration --junitxml=integration-test-results.xml --cov-branch
+          python -m pytest src/tests/integration -v --cov=src --cov-report=xml:integration-coverage.xml --junitxml=integration-test-results.xml --cov-branch
 
       - name: Upload integration test results
         uses: actions/upload-artifact@v4
