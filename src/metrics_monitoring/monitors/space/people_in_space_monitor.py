@@ -25,7 +25,31 @@ class PeopleInSpaceMonitor(BaseMonitor):
                 response.raise_for_status()
                 data = response.json()
             
-            number_of_people = len(data['people'])
+            # Try to get the number directly from the response
+            if isinstance(data, int):
+                number_of_people = data
+            # If it's a dictionary, try to get the number from the 'number' field
+            elif isinstance(data, dict):
+                if 'number' in data:
+                    number_of_people = int(data['number'])
+                # Fall back to counting people in the array if present
+                elif 'people' in data and isinstance(data['people'], list):
+                    number_of_people = len(data['people'])
+                else:
+                    self.logger.error("Invalid response format: no valid people count found")
+                    return {
+                        'value': None,
+                        'unit': 'people',
+                        'error': 'Invalid response format: no valid people count found'
+                    }
+            else:
+                self.logger.error("Invalid response format: unexpected response type")
+                return {
+                    'value': None,
+                    'unit': 'people',
+                    'error': 'Invalid response format: unexpected response type'
+                }
+
             return {
                 'value': number_of_people,
                 'unit': 'people'

@@ -25,6 +25,14 @@ class BTCMonitor(BaseMonitor):
                 response.raise_for_status()
                 data = response.json()
             
+            if 'price' not in data:
+                self.logger.error("Invalid response format: 'price' field not found")
+                return {
+                    'value': None,
+                    'unit': 'EUR',
+                    'error': 'Invalid response format: price field not found'
+                }
+            
             price = float(data['price'])
             return {
                 'value': price,

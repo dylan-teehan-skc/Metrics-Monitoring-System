@@ -2,6 +2,7 @@ from src.config.config_loader import load_config
 from src.logging.logger_setup import setup_logger
 from ..models.metrics_model import MetricsModel
 from src.client.simple_queue import SimpleQueue
+from src.client.priority_queue import PriorityMetricsQueue
 from src.utils.block_timer import BlockTimer
 import time
 from typing import Dict, List

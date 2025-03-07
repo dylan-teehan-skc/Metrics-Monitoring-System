@@ -10,7 +10,6 @@ def load_config() -> Dict:
             config = json.load(f)
             
             # Replace environment variables
-            config['monitoring']['update_interval'] = int(os.getenv('METRICS_UPDATE_INTERVAL', 10))
             config['monitoring']['Crypto']['btc']['api_url'] = os.getenv('BINANCE_BTC_URL')
             config['monitoring']['Crypto']['xrp']['api_url'] = os.getenv('BINANCE_XRP_URL')
             config['monitoring']['Weather']['temperature']['api_url'] = os.getenv('WEATHER_API_TEMPERATURE_URL')

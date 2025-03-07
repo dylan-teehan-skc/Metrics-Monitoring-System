@@ -1,8 +1,5 @@
-# Virtual Environment
-venv/
-env/
-.env/
-.venv/
+# Server folder
+server/
 
 # Python
 __pycache__/
@@ -26,10 +23,11 @@ wheels/
 .installed.cfg
 *.egg
 
-# Logs
-*.log
-logs/
-src/metrics_monitoring/logs/
+# Virtual Environment
+venv/
+env/
+ENV/
+.env
 
 # IDE
 .idea/
@@ -38,5 +36,19 @@ src/metrics_monitoring/logs/
 *.swo
 .DS_Store
 
-# Environment variables
-.env 
+# Coverage reports
+.coverage
+coverage.xml
+htmlcov/
+
+# Test reports
+*test-results.xml
+
+# Logs
+*.log
+logs/
+src/metrics_monitoring/logs/
+
+# Cache
+.cache
+.pytest_cache/ 
