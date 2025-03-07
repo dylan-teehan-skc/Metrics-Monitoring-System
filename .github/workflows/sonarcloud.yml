@@ -28,6 +28,8 @@ jobs:
           pip install pytest pytest-cov
       
       - name: Run unit tests with coverage
+        env:
+          COVERAGE_FILE: .coverage.unit
         run: |
           python -m pytest src/tests/unit -v --cov=src --cov-report=xml:unit-coverage.xml --junitxml=unit-test-results.xml
 
@@ -39,6 +41,7 @@ jobs:
           path: |
             unit-test-results.xml
             unit-coverage.xml
+            .coverage.unit
           retention-days: 30
 
   integration-tests:
@@ -60,6 +63,8 @@ jobs:
           pip install pytest pytest-cov
       
       - name: Run integration tests with coverage
+        env:
+          COVERAGE_FILE: .coverage.integration
         run: |
           python -m pytest src/tests/integration -v --cov=src --cov-report=xml:integration-coverage.xml --junitxml=integration-test-results.xml
 
@@ -71,6 +76,7 @@ jobs:
           path: |
             integration-test-results.xml
             integration-coverage.xml
+            .coverage.integration
           retention-days: 30
 
   sonarcloud:
@@ -106,7 +112,8 @@ jobs:
       
       - name: Generate combined coverage report
         run: |
-          coverage combine test-results/unit-coverage.xml test-results/integration-coverage.xml || true
+          ls -la test-results/
+          coverage combine test-results/.coverage.* || true
           coverage xml
       
       - name: SonarCloud Scan
