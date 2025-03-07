@@ -29,7 +29,7 @@ jobs:
       
       - name: Run unit tests with coverage
         run: |
-          python -m pytest src/tests/unit -v --cov=src --cov-report=xml --junitxml=unit-test-results.xml --cov-source=src --cov-branch
+          python -m pytest src/tests/unit -v --cov=src --cov-report=xml --junitxml=unit-test-results.xml --cov-branch
 
       - name: Upload unit test results
         uses: actions/upload-artifact@v4
@@ -61,7 +61,7 @@ jobs:
       
       - name: Run integration tests with coverage
         run: |
-          python -m pytest src/tests/integration -v --cov=src --cov-report=xml:integration-coverage.xml --junitxml=integration-test-results.xml --cov-source=src --cov-branch
+          python -m pytest src/tests/integration -v --cov=src --cov-report=xml:integration-coverage.xml --junitxml=integration-test-results.xml --cov-branch
 
       - name: Upload integration test results
         uses: actions/upload-artifact@v4
