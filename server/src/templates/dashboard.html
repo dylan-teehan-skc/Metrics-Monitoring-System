@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metrics Dashboard</title>
+    <style>
+        :root {
+            --primary-color: #4F46E5;
+            --primary-hover: #4338CA;
+            --background: #F3F4F6;
+            --card-bg: #FFFFFF;
+            --text-primary: #111827;
+            --text-secondary: #6B7280;
+            --border-color: #E5E7EB;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--background);
+            margin: 0;
+            padding: 0;
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 1rem;
+            padding: 2rem;
+            transition: transform 0.2s ease;
+            position: relative;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            position: relative;
+            flex-wrap: wrap;
+        }
+
+        .header-buttons {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            position: absolute;
+            right: 0;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .back-button, .export-button {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background-color: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .back-button {
+            position: absolute;
+            left: 0;
+        }
+
+        .back-button:hover, .export-button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .back-button-icon, .export-button-icon {
+            margin-right: 0.5rem;
+        }
+
+        h1 {
+            color: var(--text-primary);
+            font-size: 2.25rem;
+            font-weight: 700;
+            margin: 0;
+            text-align: center;
+            flex-grow: 1;
+        }
+
+        h2 {
+            color: var(--text-secondary);
+            font-size: 1.25rem;
+            font-weight: 500;
+            margin: 0 0 2rem 0;
+            text-align: center;
+        }
+
+        .unit {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-left: 0.25rem;
+        }
+
+        .table-container {
+            overflow-y: auto;
+            max-height: 600px;
+            margin-top: 1.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 1rem;
+        }
+
+        th {
+            background-color: #F9FAFB;
+            color: var(--text-secondary);
+            font-weight: 600;
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 2px solid var(--border-color);
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background-color: #F9FAFB;
+        }
+
+        .metric-value {
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .timestamp {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .metrics-section {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .metrics-table {
+            flex: 1;
+        }
+
+        .metrics-visualization {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            position: relative;
+        }
+
+        .gauge-container {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 150px;
+            height: 75px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: none;
+            z-index: 10; /* Ensure it is on top */
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .card {
+                margin-bottom: 2rem;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: center;
+            }
+
+            .header-buttons {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .header-actions {
+                position: static;
+                margin-top: 1rem;
+                justify-content: center;
+            }
+
+            .chart-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+
+            h1 {
+                font-size: 1.75rem;
+            }
+
+            h2 {
+                font-size: 1rem;
+            }
+
+            th, td {
+                padding: 0.75rem;
+            }
+
+            .metrics-section {
+                flex-direction: column;
+            }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <script src="https://cdn.jsdelivr.net/npm/raphael@2.3.0/raphael.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/justgage@1.3.5/justgage.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <h1>Metrics Dashboard</h1>
+                <div class="header-buttons">
+                    <a href="{{ url_for('index.index') }}" class="back-button">
+                        <span class="back-button-icon">←</span>
+                        Back
+                    </a>
+                </div>
+                {% if metric_name %}
+                <!-- New Gauge Container -->
+                <div class="gauge-container">
+                    <div id="gauge" style="width: 150px; height: 75px;"></div>
+                </div>
+                {% endif %}
+                {% if not metric_name %}
+                <div class="header-actions">
+                    <button onclick="exportToCSV()" class="export-button">
+                        <span class="export-button-icon">↓</span>
+                        Export CSV
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+            <h2>
+                {{ monitor_type }}
+                {% if metric_name %}
+                    / {{ metric_name }}
+                    {% if unit %}
+                        <span class="unit">({{ unit }})</span>
+                    {% endif %}
+                {% endif %}
+            </h2>
+            
+            <div class="metrics-section">
+                <div class="metrics-table">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Monitor</th>
+                                    <th>Metric</th>
+                                    <th>Value</th>
+                                    <th>Unit</th>
+                                    <th>Timestamp</th>
+                                    {% if not monitor_type or monitor_type == 'System' %}
+                                    <th>System ID</th>
+                                    {% endif %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for metric in metrics|sort(attribute='timestamp', reverse=True) %}
+                                <tr>
+                                    <td>{{ metric.metric_type.monitor.name }}</td>
+                                    <td>{{ metric.metric_type.name }}</td>
+                                    <td class="metric-value">{{ metric.value }}</td>
+                                    <td>{{ metric.metric_type.unit }}</td>
+                                    <td class="timestamp">{{ metric.timestamp }}</td>
+                                    {% if not monitor_type or monitor_type == 'System' %}
+                                    <td>{{ metric.system_id or 'N/A' }}</td>
+                                    {% endif %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                {% if metric_name %}
+                <div class="metrics-visualization">
+                    <div class="card">
+                        <div class="chart-header">
+                            <h2>Metric Trends</h2>
+                            <button onclick="exportToCSV()" class="export-button">
+                                <span class="export-button-icon">↓</span>
+                                Export CSV
+                            </button>
+                        </div>
+                        <canvas id="metricsChart" width="400" height="400"></canvas>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function exportToCSV() {
+            // Get table data
+            const table = document.querySelector('table');
+            const rows = table.querySelectorAll('tr');
+            
+            // Create CSV content
+            let csvContent = [];
+            
+            // Add header row
+            const headerRow = [];
+            rows[0].querySelectorAll('th').forEach(cell => {
+                headerRow.push(cell.textContent.trim());
+            });
+            csvContent.push(headerRow.join(','));
+            
+            // Add data rows
+            for (let i = 1; i < rows.length; i++) {
+                const row = [];
+                rows[i].querySelectorAll('td').forEach(cell => {
+                    // Escape commas and quotes in cell content
+                    let cellContent = cell.textContent.trim();
+                    if (cellContent.includes(',') || cellContent.includes('"')) {
+                        cellContent = `"${cellContent.replace(/"/g, '""')}"`;
+                    }
+                    row.push(cellContent);
+                });
+                csvContent.push(row.join(','));
+            }
+            
+            // Create and trigger download
+            const csvString = csvContent.join('\n');
+            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `metrics_export_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        {% if metric_name %}
+        // Fetch min and max values for the last 12 trading weeks
+        function fetchMinMaxValues() {
+            return fetch('/api/metric/minmax?monitor={{ monitor_type }}&metric={{ metric_name }}')
+                .then(response => response.json())
+                .then(data => {
+                    return {
+                        min: data.min,
+                        max: data.max
+                    };
+                })
+                .catch(error => {
+                    console.error('Error fetching min/max values:', error);
+                    return { min: 0, max: 100 }; // Default values in case of error
+                });
+        }
+
+        // Initialize the gauge with dynamic min and max
+        fetchMinMaxValues().then(({ min, max }) => {
+            const gauge = new JustGage({
+                id: "gauge",
+                value: 0,
+                min: min,
+                max: max,
+                title: "{{ metric_name }}",
+                label: "{{ unit }}"
+            });
+
+            // Function to update the gauge
+            function updateGauge() {
+                fetch('/api/metric/latest?monitor={{ monitor_type }}&metric={{ metric_name }}')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.value !== undefined) {
+                            gauge.refresh(data.value);
+                        }
+                    })
+                    .catch(error => console.error('Error fetching gauge data:', error));
+            }
+
+            // Update the gauge every 10 seconds
+            setInterval(updateGauge, 10000);
+            updateGauge(); // Initial call to set the gauge value
+        });
+        {% endif %}
+    </script>
+
+    {% if metric_name %}
+    <script>
+        const ctx = document.getElementById('metricsChart').getContext('2d');
+        const labels = [{% for metric in metrics|sort(attribute='timestamp', reverse=True) %}'{{ metric.timestamp.isoformat() }}',{% endfor %}];
+        const data = {
+            labels: labels,
+            datasets: [{
+                label: '{{ metric_name }} ({{ unit }})',
+                data: [{% for metric in metrics|sort(attribute='timestamp', reverse=True) %}{{ metric.value }},{% endfor %}],
+                borderColor: 'rgba(79, 70, 229, 1)',
+                backgroundColor: 'rgba(79, 70, 229, 0.2)',
+                fill: true,
+                tension: 0.1
+            }]
+        };
+
+        const config = {
+            type: 'line',
+            data: data,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += context.parsed.y + ' {{ unit }}';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'minute'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: '{{ metric_name }} ({{ unit }})'
+                        }
+                    }
+                }
+            }
+        };
+
+        const metricsChart = new Chart(ctx, config);
+    </script>
+    {% endif %}
+</body>
+</html>
