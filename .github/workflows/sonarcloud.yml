@@ -27,16 +27,18 @@ jobs:
           pip install -r requirements.txt
           pip install pytest pytest-cov
       
-      - name: Run unit tests
+      - name: Run unit tests with coverage
         run: |
-          python -m pytest src/tests/unit -v --junitxml=unit-test-results.xml
+          python -m pytest src/tests/unit -v --cov=src --cov-report=xml --junitxml=unit-test-results.xml --cov-source=src --cov-branch
 
       - name: Upload unit test results
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: unit-test-results
-          path: unit-test-results.xml
+          path: |
+            unit-test-results.xml
+            coverage.xml
           retention-days: 30
 
   integration-tests:
@@ -57,16 +59,18 @@ jobs:
           pip install -r requirements.txt
           pip install pytest pytest-cov
       
-      - name: Run integration tests
+      - name: Run integration tests with coverage
         run: |
-          python -m pytest src/tests/integration -v --junitxml=integration-test-results.xml
+          python -m pytest src/tests/integration -v --cov=src --cov-report=xml:integration-coverage.xml --junitxml=integration-test-results.xml --cov-source=src --cov-branch
 
       - name: Upload integration test results
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: integration-test-results
-          path: integration-test-results.xml
+          path: |
+            integration-test-results.xml
+            integration-coverage.xml
           retention-days: 30
 
   sonarcloud:
@@ -90,15 +94,16 @@ jobs:
           pip install -r requirements.txt
           pip install coverage pytest pytest-cov
       
-      - name: Run all tests with coverage
-        run: |
-          python -m pytest src/tests/unit src/tests/integration --cov=src --cov-report=xml
-      
       - name: Download test results
         uses: actions/download-artifact@v4
         with:
           path: test-results
           merge-multiple: true
+      
+      - name: Generate combined coverage report
+        run: |
+          coverage combine test-results/coverage.xml test-results/integration-coverage.xml || true
+          coverage xml
       
       - name: Cache SonarCloud packages
         uses: actions/cache@v4
@@ -121,5 +126,5 @@ jobs:
             -Dsonar.sources=src
             -Dsonar.tests=src/tests
             -Dsonar.test.inclusions=src/tests/**/*_test.py,src/tests/**/*_tests.py,src/tests/**/test_*.py
-            -Dsonar.coverage.exclusions=src/tests/**/*,src/**/__init__.py
+            -Dsonar.coverage.exclusions=src/tests/**/*,src/**/__init__.py,src/tests/**
             -Dsonar.junit.reportPaths=test-results/unit-test-results.xml,test-results/integration-test-results.xml 
