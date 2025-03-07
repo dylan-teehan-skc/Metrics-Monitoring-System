@@ -32,11 +32,12 @@ jobs:
           python -m pytest src/tests/unit -v --junitxml=unit-test-results.xml
 
       - name: Upload unit test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: unit-test-results
           path: unit-test-results.xml
+          retention-days: 30
 
   integration-tests:
     name: Integration Tests
@@ -61,11 +62,12 @@ jobs:
           python -m pytest src/tests/integration -v --junitxml=integration-test-results.xml
 
       - name: Upload integration test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: integration-test-results
           path: integration-test-results.xml
+          retention-days: 30
 
   sonarcloud:
     name: SonarCloud Analysis
@@ -93,9 +95,10 @@ jobs:
           python -m pytest src/tests/unit src/tests/integration --cov=src --cov-report=xml
       
       - name: Download test results
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           path: test-results
+          merge-multiple: true
       
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
