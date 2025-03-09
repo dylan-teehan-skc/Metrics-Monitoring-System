@@ -31,8 +31,11 @@ class MetricsModel:
                 cleaned_metrics
             )
             
-            # Override source with app name
-            metrics['metadata']['source'] = self.app_name
+            # Add metadata
+            metrics['metadata'] = {
+                'source': self.app_name,
+                'system_id': self.config.get('client', {}).get('id')
+            }
             
             return metrics
             

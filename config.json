@@ -27,7 +27,7 @@
     }
   },
   "monitoring": {
-    "update_interval": 3,
+    "update_interval": 20,
     "System": {
       "cpu_usage": {
         "enabled": true

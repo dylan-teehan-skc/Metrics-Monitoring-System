@@ -8,11 +8,11 @@ from src.metrics_monitoring.monitors.crypto.xrp_monitor import XRPMonitor
 from src.metrics_monitoring.monitors.weather.temperature_monitor import TemperatureMonitor
 from src.metrics_monitoring.monitors.weather.humidity_monitor import HumidityMonitor
 from src.metrics_monitoring.monitors.space.people_in_space_monitor import PeopleInSpaceMonitor
-from src.client.shutdown_polling import shutdown_polling
+from src.client.shutdown_handler import shutdown_handler
 
 def main():
     monitorHandler = MonitorHandler()
-    shutdown_polling.set_monitor_handler(monitorHandler)
+    shutdown_handler.set_monitor_handler(monitorHandler)
     
     # Register monitors
     monitorHandler.register_monitor(CPUMonitor())

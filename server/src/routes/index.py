@@ -31,8 +31,8 @@ def index():
             metrics_data[monitor.name] = [metric_type.name for metric_type in monitor.metric_types]
 
         return render_template('index.html',
-                               monitor_names=sorted(monitor_names),
-                               metrics_data=metrics_data)
+                             monitor_names=sorted(monitor_names),
+                             metrics_data=metrics_data)
     except Exception as e:
         logger.error(f"Error in index: {str(e)}")
         return jsonify({"error": "Internal server error"}), 500
@@ -41,14 +41,43 @@ def index():
 
 @index_bp.route('/api/shutdown-client', methods=['POST'])
 def shutdown_client():
+    """Request client shutdown"""
     try:
-        # Set shutdown timestamp
+        client_id = request.args.get('client_id')  # Optional client ID
+        
+        # Set shutdown status
         shutdown_status["shutdown_requested_at"] = time.time()
-        logger.info("Shutdown timestamp set")
-        return jsonify({"success": True, "message": "Shutdown timestamp set"})
+        shutdown_status["client_id"] = client_id
+        
+        logger.info(f"Shutdown requested for client {client_id if client_id else 'all'}")
+        return jsonify({"success": True, "message": "Shutdown request queued"}), 200
+        
     except Exception as e:
-        logger.error(f"Error in shutdown_client: {str(e)}")
-        return jsonify({"success": False, "error": "Failed to set shutdown timestamp"}), 500
+        logger.error(f"Error requesting shutdown: {str(e)}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@index_bp.route('/api/cancel-shutdown', methods=['POST'])
+def cancel_shutdown():
+    """Cancel a pending shutdown request"""
+    try:
+        client_id = request.args.get('client_id')
+        logger.info(f"Received shutdown cancellation request from client {client_id}")
+        logger.info(f"Current shutdown status: {shutdown_status}")
+        
+        # Only cancel if it matches the pending shutdown
+        if shutdown_status["client_id"] == client_id or shutdown_status["client_id"] is None:
+            shutdown_status["shutdown_requested_at"] = None
+            shutdown_status["client_id"] = None
+            logger.info(f"Shutdown cancelled for client {client_id if client_id else 'all'}")
+        else:
+            logger.info(f"Ignoring cancellation - client ID mismatch (request: {client_id}, pending: {shutdown_status['client_id']})")
+            
+        logger.info(f"Updated shutdown status: {shutdown_status}")
+        return jsonify({"success": True, "message": "Shutdown cancelled"}), 200
+        
+    except Exception as e:
+        logger.error(f"Error cancelling shutdown: {str(e)}")
+        return jsonify({"success": False, "error": str(e)}), 500
 
 @index_bp.route('/api/check-shutdown', methods=['GET'])
 def check_shutdown():

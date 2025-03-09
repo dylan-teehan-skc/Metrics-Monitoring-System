@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request
 from database import SessionLocal, Monitor, MetricType, MetricValue
 import logging
 from datetime import datetime
+from .index import shutdown_status
 
 metrics_bp = Blueprint('metrics', __name__)
 logger = logging.getLogger(__name__)
@@ -11,7 +12,7 @@ def post_metrics():
     session = SessionLocal()
     try:
         data = request.json
-        logger.info(f"Received metrics data: {data}")
+        logger.debug(f"Received metrics data: {data}")
 
         if not isinstance(data, dict):
             raise ValueError("Invalid data format: expected dictionary")
@@ -91,7 +92,25 @@ def post_metrics():
                     continue
 
         session.commit()
-        return jsonify({"message": "Metrics saved successfully"}), 201
+        
+        # Check if shutdown is requested for this client
+        should_shutdown = False
+        if shutdown_status["shutdown_requested_at"] is not None:
+            logger.info(f"Checking shutdown for client {system_id}, shutdown status: {shutdown_status}")
+            if shutdown_status["client_id"] is None or shutdown_status["client_id"] == system_id:
+                should_shutdown = True
+                if shutdown_status["client_id"] == system_id:
+                    shutdown_status["shutdown_requested_at"] = None
+                    shutdown_status["client_id"] = None
+                    logger.info(f"Sending shutdown command to client {system_id}")
+
+        response_data = {
+            "message": "Metrics saved successfully",
+            "should_shutdown": should_shutdown,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        logger.info(f"Sending response to client: {response_data}")
+        return jsonify(response_data), 201
 
     except Exception as e:
         session.rollback()
