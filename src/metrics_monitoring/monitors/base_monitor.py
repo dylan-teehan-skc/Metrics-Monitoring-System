@@ -1,8 +1,8 @@
-"""Base monitor class"""
 from typing import Dict, Any
 from abc import ABC, abstractmethod
 from src.config.config_loader import load_config
 from src.logging.logger_setup import setup_logger
+import logging
 
 class BaseMonitor(ABC):
     """Abstract base class for all monitors"""
@@ -10,7 +10,7 @@ class BaseMonitor(ABC):
     def __init__(self):
         """Initialize the base monitor"""
         self.config = load_config()
-        self.logger = setup_logger(self.config)
+        self.logger = setup_logger(self.config)  # Use the configured root logger
         self._running = True
         self.update_interval = self.config['monitoring']['update_interval']
         self.logger.debug(f"{self.get_name()} Monitor Initialized")

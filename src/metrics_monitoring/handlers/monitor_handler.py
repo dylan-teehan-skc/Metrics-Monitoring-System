@@ -13,10 +13,21 @@ class MonitorHandler:
         self.config = load_config()
         self.logger = setup_logger(self.config)
         self._running = True
+        self._paused = False
         self.last_metrics = None
         self.metrics_model = MetricsModel(self.config['app']['name'])
         self.monitors: List[BaseMonitor] = []
         self.metrics_queue = SimpleQueue()
+    
+    def pause_monitoring(self):
+        """Pause all monitoring activities"""
+        self._paused = True
+        self.logger.info("Monitoring paused")
+    
+    def resume_monitoring(self):
+        """Resume all monitoring activities"""
+        self._paused = False
+        self.logger.info("Monitoring resumed")
     
     def register_monitor(self, monitor: BaseMonitor) -> None:
         """Register a new monitor"""
@@ -25,7 +36,8 @@ class MonitorHandler:
     
     def collect_metrics(self) -> Dict:
         """Collect all metrics and return as structured data"""
-        self.logger.debug("Starting metrics collection...")
+        if self._paused:
+            return None
         
         with BlockTimer("Complete metrics collection"):
             # Initialize all_metrics based on configured groups
@@ -51,11 +63,10 @@ class MonitorHandler:
                 all_metrics
             )
             
-            # Send metrics to remote server
-            if self.last_metrics:
+            # Send metrics to remote server if not paused
+            if self.last_metrics and not self._paused:
                 self.metrics_queue.send_metrics(self.last_metrics)
         
-        self.logger.debug("Metrics collection completed")
         return self.last_metrics
     
     def run(self):
@@ -69,11 +80,12 @@ class MonitorHandler:
         try:
             while self._running:
                 try:
-                    self.collect_metrics()
+                    if not self._paused:
+                        self.collect_metrics()
                     time.sleep(self.config['monitoring']['update_interval'])
                 except Exception as e:
                     self.logger.error(f"Error in monitoring loop: {str(e)}")
-                    if self._running:
+                    if self._running and not self._paused:
                         time.sleep(self.config['monitoring']['update_interval'])
                 
         except KeyboardInterrupt:

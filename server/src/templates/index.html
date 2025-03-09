@@ -167,6 +167,7 @@
             <ul class="nav-links">
                 <li><a href="{{ url_for('monitors.get_monitors') }}">View Monitors</a></li>
                 <li><a href="{{ url_for('dashboard.dashboard') }}">Dashboard</a></li>
+                <li><a href="#" onclick="shutdownClient(); return false;" style="cursor: pointer;">Shutdown Client</a></li>
             </ul>
 
         </div>
@@ -191,6 +192,40 @@
                     metricSelect.appendChild(option);
                 });
             }
+        }
+
+        function shutdownClient() {
+            const shutdownButton = document.querySelector('a[onclick*="shutdownClient"]');
+            
+            // Disable and update button appearance
+            shutdownButton.setAttribute('style', 'background-color: #9CA3AF !important; pointer-events: none;');
+            shutdownButton.textContent = 'Shutdown Queued...';
+
+            fetch('/api/shutdown-client', {
+                method: 'POST',
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Shutdown request has been queued. The client will process this shortly.');
+                    // Reset button after 3 seconds
+                    setTimeout(() => {
+                        shutdownButton.setAttribute('style', '');
+                        shutdownButton.textContent = 'Shutdown Client';
+                    }, 1000);
+                } else {
+                    console.error('Failed to send shutdown command:', data.error);
+                    // Reset button if failed
+                    shutdownButton.setAttribute('style', '');
+                    shutdownButton.textContent = 'Shutdown Client';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Reset button if error
+                shutdownButton.setAttribute('style', '');
+                shutdownButton.textContent = 'Shutdown Client';
+            });
         }
     </script>
 </body>

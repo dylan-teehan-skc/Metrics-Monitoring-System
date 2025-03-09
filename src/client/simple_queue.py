@@ -15,6 +15,8 @@ class SimpleQueue:
         self.server_url = self.config['server']['url']
         self.queue = deque()
         self.stop_event = Event()
+        self.last_shutdown_check = 0
+        self._running = True
         
         self.logger.debug(f"Initialized metrics queue with server URL: {self.server_url}")
         
@@ -70,6 +72,23 @@ class SimpleQueue:
                         self.logger.debug(f"Server response status code: {response.status_code}")
                         self.logger.debug(f"Server response: {json.dumps(response.json(), indent=2)}")
                         
+                        # Check for shutdown command
+                        base_url = self.server_url.split('/v1.0')[0]
+                        shutdown_response = requests.get(
+                            f"{base_url}/api/check-shutdown",
+                            params={"last_check": self.last_shutdown_check},
+                            timeout=5
+                        )
+                        
+                        if shutdown_response.status_code == 200:
+                            data = shutdown_response.json()
+                            self.last_shutdown_check = data.get("server_time", time.time())
+                            
+                            if data.get("should_shutdown"):
+                                # Notify the shutdown polling thread
+                                from src.client.shutdown_polling import shutdown_polling
+                                shutdown_polling.handle_shutdown_request()
+                
                 else:
                     # No metrics to process, sleep briefly
                     time.sleep(0.1)
@@ -92,4 +111,5 @@ class SimpleQueue:
         self.logger.debug("Stopping queue processor...")
         self.stop_event.set()
         self.consumer_thread.join(timeout=5)
-        self.logger.debug(f"Queue processor stopped. Unprocessed items: {len(self.queue)}") 
+        self.logger.debug(f"Queue processor stopped. Unprocessed items: {len(self.queue)}")
+        self._running = False 
