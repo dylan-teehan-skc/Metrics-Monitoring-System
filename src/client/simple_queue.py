@@ -37,6 +37,9 @@ class SimpleQueue:
                 self.logger.debug(f"Processing metrics from queue (remaining: {len(self.queue)})")
                 
                 with BlockTimer("Send metrics to server"):
+                    # Log the complete metrics snapshot being sent
+                    self.logger.debug(f"Entire metrics snapshot: {json.dumps(metrics, indent=2)}")
+                    
                     response = requests.post(
                         self.server_url,
                         json=metrics,

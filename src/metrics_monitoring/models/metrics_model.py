@@ -31,11 +31,8 @@ class MetricsModel:
                 cleaned_metrics
             )
             
-            # Add metadata
-            metrics['metadata'] = {
-                'source': self.app_name,
-                'system_id': self.config.get('client', {}).get('id')
-            }
+            # Only update the source in metadata, preserve system_id from template
+            metrics['metadata']['source'] = self.app_name
             
             return metrics
             

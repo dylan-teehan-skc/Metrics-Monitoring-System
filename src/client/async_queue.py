@@ -5,6 +5,7 @@ import json
 from typing import Dict, Any
 from src.logging.logger_setup import setup_logger
 from src.config.config_loader import load_config
+from src.client.shutdown_handler import shutdown_handler
 
 class AsyncMetricsQueue:
     def __init__(self):
@@ -12,7 +13,7 @@ class AsyncMetricsQueue:
         self.logger = setup_logger(self.config)
         self.server_url = self.config['server']['url']
         self.queue = asyncio.Queue()
-        self.running = True
+        self._running = True
         
         # Start queue processor
         self.loop = asyncio.get_event_loop()
@@ -24,7 +25,6 @@ class AsyncMetricsQueue:
         """Add metrics to queue"""
         try:
             self.logger.debug(f"Adding metrics to queue (current size: {self.queue.qsize()})")
-            self.logger.debug(f"Metrics payload size: {len(json.dumps(metrics))} bytes")
             
             # Log key metrics being queued
             if 'data' in metrics:
@@ -32,7 +32,6 @@ class AsyncMetricsQueue:
                     self.logger.debug(f"Queueing {monitor_name} metrics: {json.dumps(monitor_data, indent=2)}")
             
             await self.queue.put(metrics)
-            self.logger.debug(f"Metrics added to queue (new size: {self.queue.qsize()})")
             return True
             
         except Exception as e:
@@ -42,17 +41,10 @@ class AsyncMetricsQueue:
     async def _process_queue(self):
         """Process queued metrics in background"""
         async with aiohttp.ClientSession() as session:
-            while self.running:
+            while self._running:
                 try:
                     metrics = await self.queue.get()
                     self.logger.debug(f"Processing metrics from queue (remaining: {self.queue.qsize()})")
-                    
-                    self.logger.debug(f"Sending metrics payload: {len(json.dumps(metrics))} bytes")
-                    
-                    # Log metrics being sent
-                    if 'data' in metrics:
-                        for monitor_name, monitor_data in metrics['data'].items():
-                            self.logger.debug(f"Sending {monitor_name} metrics: {json.dumps(monitor_data, indent=2)}")
                     
                     async with session.post(
                         self.server_url,
@@ -62,11 +54,16 @@ class AsyncMetricsQueue:
                         await response.raise_for_status()
                         response_data = await response.json()
                         
-                        self.logger.debug(f"Server response status code: {response.status}")
-                        self.logger.debug(f"Server response: {json.dumps(response_data, indent=2)}")
+                        # Log successful metrics sending with cleaner message
+                        self.logger.info(f"Metrics sent successfully. Shutdown status: {response_data.get('should_shutdown', False)}")
+                        
+                        # Check for shutdown command in response
+                        if response_data.get('should_shutdown', False):
+                            self.logger.info("Received shutdown command in metrics response")
+                            shutdown_handler.handle_shutdown_request()
                         
                 except aiohttp.ClientError as e:
-                    self.logger.error(f"Failed to send metrics to PythonAnywhere: {str(e)}")
+                    self.logger.error(f"Failed to send metrics to server: {str(e)}")
                     await self.queue.put(metrics)
                     await asyncio.sleep(5)
                     
@@ -79,8 +76,7 @@ class AsyncMetricsQueue:
     
     async def stop(self):
         """Stop the queue processor"""
-        self.logger.debug("Stopping async queue processor...")
-        self.running = False
+        self._running = False
         await self.queue.join()  # Wait for all items to be processed
         self.processor_task.cancel()
         self.logger.debug(f"Queue processor stopped. Unprocessed items: {self.queue.qsize()}") 
