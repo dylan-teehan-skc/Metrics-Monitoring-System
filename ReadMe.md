@@ -1,6 +1,6 @@
 # Monitoring System
 
-A robust monitoring system designed to collect, process, and report various metrics from system resources and external services. The system features a modular architecture with support for different types of monitors and flexible metric queuing mechanisms.
+A metrics monitoring system designed to collect, process, and report various metrics from system resources and external services. The system features a modular architecture with support for different types of monitors and flexible metric queuing mechanisms.
 
 ## Features
 
