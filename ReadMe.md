@@ -2,6 +2,8 @@
 
 A metrics monitoring system designed to collect, process, and report various metrics from system resources and external services. The system features a modular architecture with support for different types of monitors and flexible metric queuing mechanisms.
 
+<img width="931" alt="image" src="https://github.com/user-attachments/assets/d37c727c-a6c5-4c14-9d5e-750aa6bce91b" />
+
 ## Features
 
 ### Monitors
