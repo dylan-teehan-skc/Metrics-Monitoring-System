@@ -97,4 +97,3 @@ Key dependencies are listed in `requirements.txt`. Main dependencies include:
 2. Install dependencies: `pip install -r requirements.txt`
 3. Configure `.env` and `config.json`
 4. Run the application: `python main.py`
-
